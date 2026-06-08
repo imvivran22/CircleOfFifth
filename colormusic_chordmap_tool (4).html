@@ -1,0 +1,1591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ColorMusic ChordMap & Modal Spectrum Tool</title>
+    <!-- Tailwind CSS for modern responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome for clean iconography -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0c0c0e; /* zinc-950 */
+            color: #f4f4f5; /* zinc-100 */
+        }
+        .text-glow {
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #18181b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3f3f46;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #52525b;
+        }
+        .cursor-grab {
+            cursor: grab;
+        }
+        .cursor-grabbing {
+            cursor: grabbing;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col overflow-x-hidden">
+
+    <!-- HEADER -->
+    <header class="border-b border-zinc-800 bg-zinc-900/50 backdrop-blur px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4 z-10">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-rose-500 via-yellow-500 to-blue-500 flex items-center justify-center shadow-lg shadow-rose-500/20">
+                <i class="fa-solid fa-circle-nodes text-zinc-950 text-xl font-bold"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-zinc-50 via-zinc-200 to-zinc-400 bg-clip-text text-transparent">ColorMusic Wheel</h1>
+                <p class="text-xs text-zinc-400 font-medium">Tactile ChordMap & Customizable Loop Builder</p>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-4">
+            <button id="btn-audio-init" class="px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 text-zinc-950 font-semibold rounded-lg text-sm shadow-md shadow-emerald-500/10 hover:shadow-emerald-500/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
+                <i id="audio-icon" class="fa-solid fa-volume-high"></i>
+                <span id="audio-status-text">Enable Audio</span>
+            </button>
+            <a href="https://youtu.be/FtJv6djAnas" target="_blank" class="text-xs text-zinc-400 hover:text-rose-400 flex items-center gap-1 transition-colors">
+                <i class="fa-brands fa-youtube text-rose-500 text-sm"></i>
+                Original Video
+            </a>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+        <!-- LEFT PANEL: CONTROLS & INFO -->
+        <section class="lg:col-span-4 flex flex-col gap-5 h-full">
+            
+            <!-- EXPLAINER CARD -->
+            <div class="bg-zinc-900/90 border border-zinc-800/80 p-5 rounded-2xl shadow-xl flex flex-col gap-3">
+                <h2 class="text-sm font-bold tracking-wider text-zinc-400 uppercase flex items-center gap-2">
+                    <i class="fa-solid fa-circle-info text-blue-400"></i>
+                    Interactive ColorMusic Wheel
+                </h2>
+                <p class="text-xs text-zinc-300 leading-relaxed">
+                    Rotate the outer ring to select your mode. The dark overlay "shutter" acts exactly like the physical transparent plastic sheet in the video, isolating the 7 diatonic chords while aligning their correct relative Roman numerals!
+                </p>
+                <div class="text-[11px] text-zinc-400 bg-zinc-950/60 p-3 rounded-lg border border-zinc-800 flex flex-col gap-2">
+                    <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Major Chords (Inner Ring)</div>
+                    <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded bg-amber-500"></span> Minor Chords (Middle Ring)</div>
+                    <div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Diminished Chords (Outer Ring)</div>
+                </div>
+            </div>
+
+            <!-- KEY & MODE SELECTORS -->
+            <div class="bg-zinc-900/90 border border-zinc-800/80 p-5 rounded-2xl shadow-xl flex flex-col gap-4">
+                <h2 class="text-sm font-bold tracking-wider text-zinc-400 uppercase flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-amber-400"></i>
+                    Quick Selectors
+                </h2>
+                
+                <!-- KEY SELECTOR -->
+                <div>
+                    <label class="text-xs font-semibold text-zinc-400 block mb-2">Tonic Center</label>
+                    <div class="grid grid-cols-4 gap-1.5" id="key-grid">
+                        <!-- Key buttons injected dynamically -->
+                    </div>
+                </div>
+
+                <!-- MODE SELECTOR -->
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="text-xs font-semibold text-zinc-400">Active Mode</label>
+                        <span id="mode-brightness-tag" class="text-[10px] px-2 py-0.5 rounded bg-zinc-800 font-mono text-zinc-300">Bright</span>
+                    </div>
+                    <div class="flex flex-col gap-1" id="mode-list">
+                        <!-- Mode buttons injected dynamically -->
+                    </div>
+                </div>
+                
+                <!-- PLAYSTYLE SELECTOR -->
+                <div class="border-t border-zinc-800/80 pt-3">
+                    <label class="text-xs font-semibold text-zinc-400 block mb-2">Chord Extension</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="btn-triad" class="py-1.5 px-3 rounded-lg text-xs font-bold transition-all border border-amber-500/30 bg-amber-500/10 text-amber-400 shadow-sm shadow-amber-500/5">
+                            Triads (3 Notes)
+                        </button>
+                        <button id="btn-seventh" class="py-1.5 px-3 rounded-lg text-xs font-bold transition-all border border-zinc-800 bg-zinc-950 text-zinc-400 hover:text-zinc-200">
+                            Sevenths (4 Notes)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SYNTH / INSTRUMENT OPTIONS -->
+            <div class="bg-zinc-900/90 border border-zinc-800/80 p-5 rounded-2xl shadow-xl flex flex-col gap-3">
+                <h2 class="text-sm font-bold tracking-wider text-zinc-400 uppercase flex items-center gap-2">
+                    <i class="fa-solid fa-wave-square text-purple-400"></i>
+                    Tone Synthesis
+                </h2>
+                <div class="grid grid-cols-3 gap-1.5">
+                    <button id="synth-rhodes" class="py-1.5 px-2 bg-purple-500/10 border border-purple-500/30 text-purple-400 text-xs font-semibold rounded-lg transition-all">
+                        Tine Piano
+                    </button>
+                    <button id="synth-piano" class="py-1.5 px-2 bg-zinc-950 border border-zinc-800 text-zinc-400 text-xs font-semibold rounded-lg hover:text-zinc-200 transition-all">
+                        FM Piano
+                    </button>
+                    <button id="synth-pad" class="py-1.5 px-2 bg-zinc-950 border border-zinc-800 text-zinc-400 text-xs font-semibold rounded-lg hover:text-zinc-200 transition-all">
+                        Warm Pad
+                    </button>
+                </div>
+                <!-- Volume Control -->
+                <div class="flex items-center gap-3 mt-1.5">
+                    <i class="fa-solid fa-volume-low text-xs text-zinc-500"></i>
+                    <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.7" class="flex-1 accent-purple-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer">
+                    <i class="fa-solid fa-volume-high text-xs text-zinc-500"></i>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- CENTER PANEL: CHORDMAP INTERACTIVE WHEEL -->
+        <section class="lg:col-span-5 flex flex-col items-center gap-6 bg-zinc-900/50 border border-zinc-800/50 p-6 rounded-3xl shadow-2xl relative">
+            
+            <!-- INTERACTIVE ROTATOR KNOBS -->
+            <div class="absolute top-4 right-4 flex gap-2 z-20">
+                <button id="btn-rotate-ccw" class="w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 flex items-center justify-center transition-all shadow active:scale-95" title="Rotate Key CCW">
+                    <i class="fa-solid fa-rotate-left text-xs"></i>
+                </button>
+                <button id="btn-rotate-cw" class="w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 flex items-center justify-center transition-all shadow active:scale-95" title="Rotate Key CW">
+                    <i class="fa-solid fa-rotate-right text-xs"></i>
+                </button>
+            </div>
+
+            <div class="text-center">
+                <h3 class="text-sm font-semibold text-zinc-400">ColorMusic Interactive Wheel</h3>
+                <p class="text-xs text-zinc-500">Drag outer rim to spin, click uncovered chords to play</p>
+            </div>
+
+            <!-- CHORDMAP SVG CONTAINER -->
+            <div class="relative w-full max-w-[400px] aspect-square flex items-center justify-center">
+                <svg id="chordmap-svg" viewBox="0 0 400 400" class="w-full h-full select-none overflow-visible">
+                    <!-- STATIC BASE WHEEL LAYER -->
+                    <g id="base-wheel-group"></g>
+
+                    <!-- ROTATABLE TRANSPARENT OVERLAY SHEET -->
+                    <g id="rotating-overlay-group" class="cursor-grab transition-transform duration-300 ease-out">
+                        <!-- Translucent cover wedges drawn directly inside group to handle masks natively -->
+                        <g id="shutter-cover-wedges"></g>
+                        
+                        <!-- Physical T-shutter outline overlay printed on the plastic sheet -->
+                        <path id="shutter-border-path" d="" fill="none" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round" class="pointer-events-none" />
+                        
+                        <!-- Outer rotating grey rim -->
+                        <circle cx="200" cy="200" r="195" fill="none" stroke="#27272a" stroke-width="12" class="opacity-85" />
+                        
+                        <!-- Mode labels along the outer rim -->
+                        <g id="outer-rim-labels"></g>
+
+                        <!-- Relative Roman numerals corresponding to the highlighted chords -->
+                        <g id="relative-roman-labels" class="pointer-events-none"></g>
+                    </g>
+
+                    <!-- CENTER HUB CAP (Static) -->
+                    <g id="center-cap" class="cursor-pointer">
+                        <circle cx="200" cy="200" r="40" fill="#18181b" stroke="#3f3f46" stroke-width="2" />
+                        <text x="200" y="195" text-anchor="middle" id="center-key-letter" class="fill-white text-base font-extrabold" dy=".3em">-</text>
+                        <text x="200" y="215" text-anchor="middle" id="center-mode-label" class="fill-zinc-400 text-[9px] font-semibold uppercase tracking-wider">-</text>
+                    </g>
+                </svg>
+            </div>
+
+            <!-- TACTILE DRAG / SWIPE HELP -->
+            <div class="w-full flex justify-between gap-4 text-xs font-semibold bg-zinc-950/30 p-3 rounded-xl border border-zinc-800/40">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow shadow-rose-500/50"></span>
+                    <span class="text-zinc-400">Scale Chords</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded bg-zinc-800 border border-zinc-700"></span>
+                    <span class="text-zinc-500">Masked Chords</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-arrows-spin text-emerald-400 text-[11px]"></i>
+                    <span class="text-zinc-400">Drag Rim to Spin</span>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- RIGHT PANEL: CHORD LISTS & SEQUENCER LOOPS -->
+        <section class="lg:col-span-3 flex flex-col gap-5 h-full">
+            
+            <!-- DIATONIC CHORDS QUICK VIEW -->
+            <div class="bg-zinc-900/90 border border-zinc-800/80 p-5 rounded-2xl shadow-xl flex flex-col gap-3">
+                <h2 class="text-sm font-bold tracking-wider text-zinc-400 uppercase flex items-center gap-2">
+                    <i class="fa-solid fa-music text-rose-400"></i>
+                    Scale Chords
+                </h2>
+                <div class="flex flex-col gap-2" id="chord-badges-container">
+                    <!-- Dynamic badges for current mode's chords -->
+                </div>
+            </div>
+
+            <!-- PRESET SEQUENCER CARD (4-CHORD LOOPS) -->
+            <div class="bg-zinc-900/90 border border-zinc-800/80 p-5 rounded-2xl shadow-xl flex flex-col gap-4 relative">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-sm font-bold tracking-wider text-zinc-400 uppercase flex items-center gap-2">
+                        <i class="fa-solid fa-arrows-spin text-emerald-400 animate-spin-slow"></i>
+                        Customizable Loop Builder
+                    </h2>
+                    <span class="text-[10px] px-2 py-0.5 rounded bg-zinc-950 font-mono text-zinc-400" id="bpm-display">120 BPM</span>
+                </div>
+
+                <p class="text-[11px] text-zinc-300">
+                    Tap any of the 4 slots below to change the chord and build a customized modal loop progression!
+                </p>
+
+                <!-- ACTIVE PRESET CHORDS BAR -->
+                <div class="grid grid-cols-4 gap-1.5 p-2 bg-zinc-950 rounded-xl border border-zinc-800/60" id="preset-sequence-bar">
+                    <!-- Loaded dynamically, clickable step boxes -->
+                </div>
+
+                <!-- CONTROLS -->
+                <div class="flex flex-col gap-3">
+                    <div class="flex items-center gap-2">
+                        <button id="btn-loop-toggle" class="flex-1 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-zinc-950 font-bold rounded-xl text-xs shadow-md shadow-emerald-500/10 hover:shadow-emerald-500/20 active:scale-95 transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-play"></i>
+                            Start Loop Player
+                        </button>
+                        <button id="btn-reset-loop" class="px-3 py-2.5 bg-zinc-850 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 text-xs font-bold rounded-xl transition-all" title="Reset Progression to Mode Default">
+                            Reset
+                        </button>
+                    </div>
+
+                    <!-- BPM Slider -->
+                    <div class="flex flex-col gap-1.5">
+                        <div class="flex justify-between text-[10px] text-zinc-500 font-mono">
+                            <span>TEMPO</span>
+                            <span id="tempo-val">120 BPM</span>
+                        </div>
+                        <input type="range" id="bpm-slider" min="60" max="200" value="120" class="w-full accent-emerald-500 h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer">
+                    </div>
+                </div>
+
+                <!-- INTERACTIVE CHORD REASSIGNMENT POPOVER -->
+                <div id="chord-selector-popover" class="hidden absolute left-4 right-4 bottom-24 bg-zinc-900 border-2 border-amber-500/50 rounded-2xl p-4 shadow-2xl z-30 flex flex-col gap-3">
+                    <div class="flex justify-between items-center">
+                        <h4 class="text-xs font-bold text-amber-400">Reassign Chord for Slot <span id="target-slot-num">1</span></h4>
+                        <button onclick="closeChordPopover()" class="text-zinc-500 hover:text-zinc-200"><i class="fa-solid fa-times text-xs"></i></button>
+                    </div>
+                    <div class="grid grid-cols-4 gap-1.5" id="popover-chord-options">
+                        <!-- Populated dynamically with active scale chord choices -->
+                    </div>
+                </div>
+
+                <!-- DESCRIPTION OF PROGRESSION -->
+                <div class="p-3 bg-zinc-950/40 rounded-xl border border-zinc-800/40 text-[11px] text-zinc-400 leading-relaxed" id="progression-desc">
+                    Select a mode to preview its specific loop progression.
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- FOOTER & PIANO KEYBOARD PREVIEW -->
+    <footer class="border-t border-zinc-800 bg-zinc-900/40 py-6 px-4 mt-auto">
+        <div class="max-w-4xl mx-auto flex flex-col gap-4">
+            
+            <div class="flex justify-between items-center px-2">
+                <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-keyboard text-purple-400"></i>
+                    Interactive Keyboard Visualizer
+                </span>
+                <span id="playing-chord-label" class="text-xs font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full opacity-0 transition-opacity">
+                    Playing: C Major
+                </span>
+            </div>
+
+            <!-- KEYBOARD CONTAINER -->
+            <div class="relative w-full h-24 bg-zinc-950 rounded-2xl border-4 border-zinc-900 shadow-2xl flex select-none" id="piano-keyboard">
+                <!-- White & Black keys will be dynamically populated with correct relative offsets -->
+            </div>
+            
+            <p class="text-[10px] text-center text-zinc-500 font-medium">
+                Designed after Mike George's ColorMusic ChordMap system. Built with fully responsive SVG graphics, Tailwind CSS, and Web Audio API synthesizer.
+            </p>
+        </div>
+    </footer>
+
+    <!-- STYLES AND SCRIPTS -->
+    <script>
+        // 12 tones in Circle of Fifths order starting from 12 o'clock (C)
+        const fifthsCircle = [
+            { name: "C", semitones: 0 },
+            { name: "G", semitones: 7 },
+            { name: "D", semitones: 2 },
+            { name: "A", semitones: 9 },
+            { name: "E", semitones: 4 },
+            { name: "B", semitones: 11 },
+            { name: "F#", semitones: 6 },
+            { name: "Db", semitones: 1 },
+            { name: "Ab", semitones: 8 },
+            { name: "Eb", semitones: 3 },
+            { name: "Bb", semitones: 10 },
+            { name: "F", semitones: 5 }
+        ];
+
+        // 7 Modes ordered from Brightest (Lydian) to Darkest (Locrian) along the spectrum curve
+        const modesSpectrum = [
+            { id: "lydian", name: "Lydian", offset: 1, brightness: "Brightest", description: "Mysterious, dream-like. Raised 4th degree creates a floating lift.", color: "#ec4899", defaultLoop: ["I", "II", "vi", "I"] },
+            { id: "ionian", name: "Ionian", offset: 0, brightness: "Bright", description: "Joyful, stable. Standard Major Scale.", color: "#f97316", defaultLoop: ["I", "V", "vi", "IV"] },
+            { id: "mixolydian", name: "Mixolydian", offset: -1, brightness: "Warm", description: "Rock n' Roll, bluesy. Major feel with a flat 7th lowering tension.", color: "#eab308", defaultLoop: ["I", "bVII", "IV", "I"] },
+            { id: "dorian", name: "Dorian", offset: -2, brightness: "Neutral", description: "Cool, jazz-like. Minor feel with a raised 6th giving optimism.", color: "#22c55e", defaultLoop: ["i", "bIII", "bVII", "IV"] },
+            { id: "aeolian", name: "Aeolian", offset: -3, brightness: "Cool", description: "Sad, romantic, cinematic. Natural Minor. Rich emotional pull.", color: "#3b82f6", defaultLoop: ["i", "bVI", "bIII", "bVII"] },
+            { id: "phrygian", name: "Phrygian", offset: -4, brightness: "Dark", description: "Spanish, heavy metal. Minor feel with a flat 2nd giving tense urgency.", color: "#6366f1", defaultLoop: ["i", "bII", "bvii", "i"] },
+            { id: "locrian", name: "Locrian", offset: -5, brightness: "Darkest", description: "Unstable, tense. Diminished 5th tonic makes resolution difficult.", color: "#a855f7", defaultLoop: ["i°", "bIII", "bvii", "bV"] }
+        ];
+
+        // Harmonic note colors map (Newtonian/ColorMusic spectrum)
+        const noteColors = {
+            0: "#ef4444",   // C: Red
+            1: "#f97316",   // C#: Orange
+            2: "#facc15",   // D: Yellow
+            3: "#a3e635",   // D#: Yellow-Green
+            4: "#22c55e",   // E: Green
+            5: "#10b981",   // F: Mint
+            6: "#06b6d4",   // F#: Cyan
+            7: "#3b82f6",   // G: Blue
+            8: "#6366f1",   // G#: Indigo
+            9: "#8b5cf6",   // A: Purple
+            10: "#d946ef",  // A#: Violet
+            11: "#ec4899"   // B: Pink
+        };
+
+        // Absolute scale degree sorting indices for chronological presentation (I -> ii -> iii -> IV...)
+        const degreeOrder = {
+            "I": 1, "i": 1, "i°": 1, "Imaj7": 1, "im7": 1, "iø7": 1,
+            "bII": 2, "ii": 2, "ii°": 2, "bIImaj7": 2, "iim7": 2, "iiø7": 2,
+            "bIII": 3, "biii": 3, "iii": 3, "iii°": 3, "bIIImaj7": 3, "biiim7": 3, "iiim7": 3, "iiiø7": 3,
+            "IV": 4, "iv": 4, "#iv°": 4, "IVmaj7": 4, "ivm7": 4, "#ivø7": 4,
+            "V": 5, "v": 5, "v°": 5, "bV": 5, "V7": 5, "vm7": 5, "vø7": 5, "bVmaj7": 5,
+            "bVI": 6, "vi": 6, "vi°": 6, "bVImaj7": 6, "vim7": 6, "viø7": 6,
+            "bVII": 7, "bvii": 7, "vii": 7, "vii°": 7, "bVII7": 7, "bviim7": 7, "viim7": 7, "viiø7": 7
+        };
+
+        // Absolute modal Roman numeral configurations for each layout cell on the wheel
+        const modeRomans = {
+            lydian:     { leftInner: "I",    centerInner: "V",    rightInner: "II",   leftMiddle: "vi",   centerMiddle: "iii",  rightMiddle: "vii",  centerOuter: "#iv°" },
+            ionian:     { leftInner: "IV",   centerInner: "I",    rightInner: "V",    leftMiddle: "ii",   centerMiddle: "vi",   rightMiddle: "iii",  centerOuter: "vii°" },
+            mixolydian: { leftInner: "bVII", centerInner: "IV",   rightInner: "I",    leftMiddle: "v",    centerMiddle: "ii",   rightMiddle: "vi",   centerOuter: "iii°" },
+            dorian:     { leftInner: "bIII", centerInner: "bVII",  rightInner: "IV",   leftMiddle: "i",    centerMiddle: "v",    rightMiddle: "ii",   centerOuter: "vi°" },
+            aeolian:    { leftInner: "bVI",  centerInner: "bIII",  rightInner: "bVII",  leftMiddle: "iv",   centerMiddle: "i",    rightMiddle: "v",    centerOuter: "ii°" },
+            phrygian:   { leftInner: "bII",  centerInner: "bVI",   rightInner: "bIII",  leftMiddle: "bvii", centerMiddle: "iv",   rightMiddle: "i",    centerOuter: "v°" },
+            locrian:    { leftInner: "bV",   centerInner: "bII",   rightInner: "bVI",   leftMiddle: "biii", centerMiddle: "bvii", rightMiddle: "iv",   centerOuter: "i°" }
+        };
+
+        // App states
+        let currentTonicIndex = 0; // C starts
+        let currentModeIndex = 1;  // Ionian (Major) starts
+        let currentChordType = "triad"; 
+        let currentSynthType = "rhodes"; 
+        let loopTimer = null;
+        let loopStep = 0;
+        let isPlayingLoop = false;
+        let bpm = 120;
+        let masterVolume = 0.7;
+
+        // Custom Loop Array
+        let customProgression = ["I", "V", "vi", "IV"];
+        let targetReassignSlot = 0;
+
+        // Interactive dragging angles tracking
+        let isDraggingRim = false;
+        let dragStartAngle = 0;
+        let baseRotationAtDragStart = 0;
+        let overlayAngle = 0; // In degrees
+
+        // Audio Engine
+        let audioContext = null;
+        let masterGainNode = null;
+        let activeKeyboardKeys = [];
+
+        function initAudio() {
+            if (audioContext) return;
+            try {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                audioContext = new AudioContextClass();
+                
+                masterGainNode = audioContext.createGain();
+                masterGainNode.gain.setValueAtTime(masterVolume, audioContext.currentTime);
+
+                const delayNode = audioContext.createDelay();
+                delayNode.delayTime.setValueAtTime(0.24, audioContext.currentTime);
+
+                const feedbackNode = audioContext.createGain();
+                feedbackNode.gain.setValueAtTime(0.25, audioContext.currentTime);
+
+                delayNode.connect(feedbackNode);
+                feedbackNode.connect(delayNode);
+
+                masterGainNode.connect(audioContext.destination);
+                masterGainNode.connect(delayNode);
+                delayNode.connect(audioContext.destination);
+
+                document.getElementById("btn-audio-init").classList.remove("from-emerald-500", "to-teal-600");
+                document.getElementById("btn-audio-init").classList.add("from-zinc-800", "to-zinc-700", "text-zinc-200");
+                document.getElementById("audio-status-text").innerText = "Audio Active";
+                document.getElementById("audio-icon").className = "fa-solid fa-square-check text-emerald-400";
+            } catch (err) {
+                console.error("Audio Context Init Failed", err);
+            }
+        }
+
+        // Synthesizers voice profiles
+        function playNote(freq, startTime, duration, voiceType) {
+            if (!audioContext) return;
+            const osc1 = audioContext.createOscillator();
+            const osc2 = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            gainNode.connect(masterGainNode);
+
+            if (voiceType === "rhodes") {
+                osc1.type = "sine";
+                osc1.frequency.setValueAtTime(freq, startTime);
+                osc2.type = "triangle";
+                osc2.frequency.setValueAtTime(freq, startTime);
+                osc2.detune.setValueAtTime(6, startTime);
+
+                gainNode.gain.setValueAtTime(0, startTime);
+                gainNode.gain.linearRampToValueAtTime(0.35, startTime + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.12, startTime + 0.15);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+                
+                osc1.connect(gainNode);
+                const bodyGain = audioContext.createGain();
+                bodyGain.gain.setValueAtTime(0.15, startTime);
+                osc2.connect(bodyGain);
+                bodyGain.connect(gainNode);
+
+                osc1.start(startTime);
+                osc2.start(startTime);
+                osc1.stop(startTime + duration);
+                osc2.stop(startTime + duration);
+            } else if (voiceType === "piano") {
+                osc1.type = "triangle";
+                osc1.frequency.setValueAtTime(freq, startTime);
+                osc2.type = "sine";
+                osc2.frequency.setValueAtTime(freq * 2, startTime);
+
+                gainNode.gain.setValueAtTime(0, startTime);
+                gainNode.gain.linearRampToValueAtTime(0.25, startTime + 0.005);
+                gainNode.gain.exponentialRampToValueAtTime(0.08, startTime + 0.25);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+                osc1.connect(gainNode);
+                const overtoneGain = audioContext.createGain();
+                overtoneGain.gain.setValueAtTime(0.06, startTime);
+                osc2.connect(overtoneGain);
+                overtoneGain.connect(gainNode);
+
+                osc1.start(startTime);
+                osc2.start(startTime);
+                osc1.stop(startTime + duration);
+                osc2.stop(startTime + duration);
+            } else {
+                // Pad Synth
+                osc1.type = "sawtooth";
+                osc1.frequency.setValueAtTime(freq, startTime);
+
+                gainNode.gain.setValueAtTime(0, startTime);
+                gainNode.gain.linearRampToValueAtTime(0.18, startTime + 0.3); 
+                gainNode.gain.linearRampToValueAtTime(0.14, startTime + duration - 0.2);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+                const filter = audioContext.createBiquadFilter();
+                filter.type = "lowpass";
+                filter.frequency.setValueAtTime(freq * 2.5, startTime);
+
+                osc1.connect(filter);
+                filter.connect(gainNode);
+
+                osc1.start(startTime);
+                osc1.stop(startTime + duration);
+            }
+        }
+
+        function playChord(midiRoot, chordQuality) {
+            initAudio();
+            if (audioContext && audioContext.state === "suspended") {
+                audioContext.resume();
+            }
+
+            let intervals = [0, 4, 7]; // Major
+            if (chordQuality === "min") intervals = [0, 3, 7];
+            if (chordQuality === "dim") intervals = [0, 3, 6];
+
+            if (currentChordType === "seventh") {
+                if (chordQuality === "maj") intervals.push(11);
+                else if (chordQuality === "min") intervals.push(10);
+                else if (chordQuality === "dim") intervals.push(10); // Diatonically half-diminished
+            }
+
+            const playTime = audioContext.currentTime;
+            const duration = 1.8;
+
+            // Voice the chord
+            const triggeredMidiNotes = [];
+            // Low bass note
+            const bassNote = midiRoot - 12;
+            triggeredMidiNotes.push(bassNote);
+            playNote(440 * Math.pow(2, (bassNote - 69) / 12), playTime, duration, currentSynthType);
+
+            intervals.forEach(interval => {
+                const midi = midiRoot + interval;
+                triggeredMidiNotes.push(midi);
+                playNote(440 * Math.pow(2, (midi - 69) / 12), playTime, duration, currentSynthType);
+            });
+
+            activeKeyboardKeys = triggeredMidiNotes;
+            updateKeyboardVisuals();
+
+            setTimeout(() => {
+                activeKeyboardKeys = activeKeyboardKeys.filter(k => !triggeredMidiNotes.includes(k));
+                updateKeyboardVisuals();
+            }, duration * 1000);
+        }
+
+        // Helper to output correct chord nomenclatures dynamically
+        function getChordLabel(rootName, quality, chordType) {
+            if (chordType === "triad") {
+                if (quality === "maj") return rootName;
+                if (quality === "min") return rootName + "m";
+                if (quality === "dim") return rootName + "°";
+            } else {
+                if (quality === "maj") return rootName + "maj7";
+                if (quality === "min") return rootName + "m7";
+                if (quality === "dim") return rootName + "ø7"; // Standard half-diminished symbol
+            }
+            return rootName;
+        }
+
+        // Get details of the current scale's 7 chords mapping to the T-shutter layouts
+        function getScaleInfoForTonic(tonicIdx) {
+            const activeChords = [];
+            const activeMode = modesSpectrum[currentModeIndex];
+            
+            // Core circle center points formulas
+            const parallelMajorIdx = (tonicIdx + activeMode.offset + 12) % 12;
+
+            const layout = [
+                { colOffset: -1, ringType: "inner", quality: "maj", romanKey: "leftInner" },
+                { colOffset: 0, ringType: "inner", quality: "maj", romanKey: "centerInner" },
+                { colOffset: 1, ringType: "inner", quality: "maj", romanKey: "rightInner" },
+                { colOffset: -1, ringType: "middle", quality: "min", romanKey: "leftMiddle" },
+                { colOffset: 0, ringType: "middle", quality: "min", romanKey: "centerMiddle" },
+                { colOffset: 1, ringType: "middle", quality: "min", romanKey: "rightMiddle" },
+                { colOffset: 0, ringType: "outer", quality: "dim", romanKey: "centerOuter" }
+            ];
+
+            layout.forEach(item => {
+                const sectorIndex = (parallelMajorIdx + item.colOffset + 12) % 12;
+                let noteObj;
+                let quality = item.quality;
+
+                if (item.ringType === "inner") {
+                    noteObj = fifthsCircle[sectorIndex];
+                } else if (item.ringType === "middle") {
+                    noteObj = fifthsCircle[(sectorIndex + 3) % 12];
+                } else {
+                    noteObj = fifthsCircle[(sectorIndex + 5) % 12];
+                }
+
+                // Map relative Roman Numerals dynamically relative to active mode and chord extension type
+                let roman = modeRomans[activeMode.id][item.romanKey];
+                
+                // Format Roman designations to include 7ths if Sevenths is selected
+                if (currentChordType === "seventh") {
+                    if (roman.includes("°")) {
+                        roman = roman.replace("°", "ø7");
+                    } else if (roman === "I" || roman === "IV" || roman === "V" || roman === "bIII" || roman === "bVI" || roman === "bVII" || roman === "bII" || roman === "bV") {
+                        // Major degrees get maj7
+                        roman = roman + "maj7";
+                    } else if (roman === "ii" || roman === "iii" || roman === "vi" || roman === "i" || roman === "iv" || roman === "v" || roman === "bvii" || roman === "biii" || roman === "vii") {
+                        // Minor degrees get m7
+                        roman = roman + "m7";
+                    }
+                }
+
+                activeChords.push({
+                    sectorIndex,
+                    name: noteObj.name,
+                    semitones: noteObj.semitones,
+                    quality,
+                    roman,
+                    ringType: item.ringType
+                });
+            });
+
+            return {
+                startIndex: (parallelMajorIdx - 1 + 12) % 12,
+                activeChords
+            };
+        }
+
+        function getScaleInfo() {
+            return getScaleInfoForTonic(currentTonicIndex);
+        }
+
+        // Render Static Base Plate Chord Buttons
+        function buildBaseWheel() {
+            const baseGroup = document.getElementById("base-wheel-group");
+            baseGroup.innerHTML = "";
+
+            // Solid Outer Dial ring
+            const bgCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            bgCircle.setAttribute("cx", "200");
+            bgCircle.setAttribute("cy", "200");
+            bgCircle.setAttribute("r", "190");
+            bgCircle.setAttribute("fill", "#111115");
+            bgCircle.setAttribute("stroke", "#27272a");
+            bgCircle.setAttribute("stroke-width", "2");
+            baseGroup.appendChild(bgCircle);
+
+            // Spoke lines separating the 12 columns
+            for (let i = 0; i < 12; i++) {
+                const angle = -105 + i * 30;
+                const rad = Math.PI / 180;
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute("x1", 200 + 40 * Math.cos(angle * rad));
+                line.setAttribute("y1", 200 + 40 * Math.sin(angle * rad));
+                line.setAttribute("x2", 200 + 190 * Math.cos(angle * rad));
+                line.setAttribute("y2", 200 + 190 * Math.sin(angle * rad));
+                line.setAttribute("stroke", "#27272a");
+                line.setAttribute("stroke-width", "1");
+                baseGroup.appendChild(line);
+            }
+
+            // Draw concentric rings dividers
+            const rings = [70, 110, 150];
+            rings.forEach(r => {
+                const circ = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circ.setAttribute("cx", "200");
+                circ.setAttribute("cy", "200");
+                circ.setAttribute("r", r);
+                circ.setAttribute("fill", "none");
+                circ.setAttribute("stroke", "#27272a");
+                circ.setAttribute("stroke-width", "1");
+                baseGroup.appendChild(circ);
+            });
+
+            // Populate base chords (3 rings of 12 columns)
+            fifthsCircle.forEach((note, sectorIdx) => {
+                const baseAngle = -90 + sectorIdx * 30; // Center angle of the sector
+
+                // 1. Inner Ring (Major Chords)
+                drawChordCell(baseGroup, baseAngle, 90, note.name, "maj", note.semitones, sectorIdx, "inner");
+
+                // 2. Middle Ring (Minor Chords)
+                const minNoteObj = fifthsCircle[(sectorIdx + 3) % 12];
+                drawChordCell(baseGroup, baseAngle, 130, minNoteObj.name, "min", minNoteObj.semitones, sectorIdx, "middle");
+
+                // 3. Outer Ring (Diminished Chords)
+                const dimNoteObj = fifthsCircle[(sectorIdx + 5) % 12];
+                drawChordCell(baseGroup, baseAngle, 170, dimNoteObj.name, "dim", dimNoteObj.semitones, sectorIdx, "outer");
+            });
+        }
+
+        // Draws beautiful chord shapes exactly matching the original layout with dynamic note color dots
+        function drawChordCell(parent, angle, radius, baseNoteName, quality, semitones, sectorIdx, ringType) {
+            const rad = Math.PI / 180;
+            const x = 200 + radius * Math.cos(angle * rad);
+            const y = 200 + radius * Math.sin(angle * rad);
+
+            const cellGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            cellGroup.setAttribute("class", "cursor-pointer");
+
+            // Event handler to play chord on click
+            cellGroup.onclick = () => {
+                const rootMidi = 48 + semitones;
+                playChord(rootMidi, quality);
+            };
+
+            // Chord background shape based on quality
+            let shape;
+            if (ringType === "inner") {
+                // Circular badges
+                shape = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                shape.setAttribute("cx", x);
+                shape.setAttribute("cy", y);
+                shape.setAttribute("r", "16");
+                shape.setAttribute("fill", "#f43f5e"); // Rose/Pink
+            } else if (ringType === "middle") {
+                // Square badges
+                shape = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                shape.setAttribute("x", x - 15);
+                shape.setAttribute("y", y - 15);
+                shape.setAttribute("width", "30");
+                shape.setAttribute("height", "30");
+                shape.setAttribute("rx", "4");
+                shape.setAttribute("fill", "#fbbf24"); // Yellow/Amber
+            } else {
+                // Hexagonal/diamond badge
+                shape = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                const points = `${x},${y-16} ${x+14},${y} ${x},${y+16} ${x-14},${y}`;
+                shape.setAttribute("points", points);
+                shape.setAttribute("fill", "#10b981"); // Emerald green
+            }
+            cellGroup.appendChild(shape);
+
+            // Compute dynamic nomenclature label
+            const label = getChordLabel(baseNoteName, quality, currentChordType);
+
+            // Inner label text
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", x);
+            text.setAttribute("y", y - 1);
+            text.setAttribute("text-anchor", "middle");
+            text.setAttribute("dominant-baseline", "middle");
+            text.setAttribute("font-weight", "900");
+            text.setAttribute("fill", "#09090b");
+            
+            // Scaled text-size down for Sevenths extensions labels
+            const fontSize = currentChordType === "seventh" ? "8px" : "10px";
+            text.setAttribute("font-size", fontSize);
+            text.textContent = label;
+            cellGroup.appendChild(text);
+
+            // Note dots mapping calculation (ColorMusic harmonic core)
+            const root = semitones;
+            let firstHarmonic = (root + 4) % 12;  // Major third
+            let secondHarmonic = (root + 7) % 12; // Perfect fifth
+            let thirdHarmonic = null;             // Seventh extension note
+
+            if (quality === "min") {
+                firstHarmonic = (root + 3) % 12;  // Minor third
+            } else if (quality === "dim") {
+                firstHarmonic = (root + 3) % 12;  // Minor third
+                secondHarmonic = (root + 6) % 12; // Diminished fifth
+            }
+
+            if (currentChordType === "seventh") {
+                if (quality === "maj") {
+                    thirdHarmonic = (root + 11) % 12; // Major seventh
+                } else if (quality === "min") {
+                    thirdHarmonic = (root + 10) % 12; // Minor seventh
+                } else if (quality === "dim") {
+                    thirdHarmonic = (root + 10) % 12; // Minor seventh (creating half-diminished)
+                }
+            }
+
+            // Create arrays of notes to render
+            const notesToColor = [root, firstHarmonic, secondHarmonic];
+            if (thirdHarmonic !== null) {
+                notesToColor.push(thirdHarmonic);
+            }
+
+            // Calculate responsive spacing positions
+            const dotsY = y + 8;
+            const dotOffsets = currentChordType === "seventh" ? [-9, -3, 3, 9] : [-6, 0, 6];
+
+            notesToColor.forEach((noteIndex, idx) => {
+                const dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                dot.setAttribute("cx", x + dotOffsets[idx]);
+                dot.setAttribute("cy", dotsY);
+                dot.setAttribute("r", "2.2");
+                dot.setAttribute("fill", noteColors[noteIndex] || "#ffffff");
+                dot.setAttribute("stroke", "#000000");
+                dot.setAttribute("stroke-width", "0.5");
+                cellGroup.appendChild(dot);
+            });
+
+            parent.appendChild(cellGroup);
+        }
+
+        // SVG Wedge builder helper
+        function getWedgePath(cx, cy, rIn, rOut, startAngle, endAngle) {
+            const rad = Math.PI / 180;
+            const x1_in = cx + rIn * Math.cos(startAngle * rad);
+            const y1_in = cy + rIn * Math.sin(startAngle * rad);
+            const x2_in = cx + rIn * Math.cos(endAngle * rad);
+            const y2_in = cy + rIn * Math.sin(endAngle * rad);
+            
+            const x1_out = cx + rOut * Math.cos(startAngle * rad);
+            const y1_out = cy + rOut * Math.sin(startAngle * rad);
+            const x2_out = cx + rOut * Math.cos(endAngle * rad);
+            const y2_out = cy + rOut * Math.sin(endAngle * rad);
+            
+            return `M ${x1_in} ${y1_in} L ${x1_out} ${y1_out} A ${rOut} ${rOut} 0 0 1 ${x2_out} ${y2_out} L ${x2_in} ${y2_in} A ${rIn} ${rIn} 0 0 0 ${x1_in} ${y1_in} Z`;
+        }
+
+        // Generate Shutter mask & borders on static reference template
+        function updateShutterMaskAndOutline() {
+            // 1. Build Cover Wedges statically inside the group to overlay blocked areas cleanly
+            const coverGroup = document.getElementById("shutter-cover-wedges");
+            if (coverGroup) {
+                coverGroup.innerHTML = "";
+                // Loop through 12 columns
+                for (let i = 0; i < 12; i++) {
+                    const startAng = -105 + i * 30;
+                    const endAng = -75 + i * 30;
+                    
+                    if (i === 0) {
+                        // Center Active Sector (12 o'clock / Ionian): completely open!
+                    } else if (i === 11 || i === 1) {
+                        // Left & Right boundary sectors: Inner & Middle open, Outer blocked
+                        const pathStr = getWedgePath(200, 200, 150, 190, startAng, endAng);
+                        const pathNode = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                        pathNode.setAttribute("d", pathStr);
+                        pathNode.setAttribute("fill", "#0c0c0e");
+                        pathNode.setAttribute("fill-opacity", "0.85");
+                        coverGroup.appendChild(pathNode);
+                    } else {
+                        // All other 9 sectors: entirely blocked
+                        const pathStr = getWedgePath(200, 200, 45, 190, startAng, endAng);
+                        const pathNode = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                        pathNode.setAttribute("d", pathStr);
+                        pathNode.setAttribute("fill", "#0c0c0e");
+                        pathNode.setAttribute("fill-opacity", "0.85");
+                        coverGroup.appendChild(pathNode);
+                    }
+                }
+            }
+
+            // 2. Draw the tactile physical yellow T-shutter outline statically
+            const borderPath = document.getElementById("shutter-border-path");
+            if (borderPath) {
+                const rad = Math.PI / 180;
+                
+                // Define coordinates enclosing columns 11, 0, and 1
+                const p1x = 200 + 45 * Math.cos(-135 * rad);
+                const p1y = 200 + 45 * Math.sin(-135 * rad);
+                
+                const p2x = 200 + 150 * Math.cos(-135 * rad);
+                const p2y = 200 + 150 * Math.sin(-135 * rad);
+                
+                const p3x = 200 + 150 * Math.cos(-105 * rad);
+                const p3y = 200 + 150 * Math.sin(-105 * rad);
+                
+                const p4x = 200 + 190 * Math.cos(-105 * rad);
+                const p4y = 200 + 190 * Math.sin(-105 * rad);
+                
+                const p5x = 200 + 190 * Math.cos(-75 * rad);
+                const p5y = 200 + 190 * Math.sin(-75 * rad);
+                
+                const p6x = 200 + 150 * Math.cos(-75 * rad);
+                const p6y = 200 + 150 * Math.sin(-75 * rad);
+                
+                const p7x = 200 + 150 * Math.cos(-45 * rad);
+                const p7y = 200 + 150 * Math.sin(-45 * rad);
+                
+                const p8x = 200 + 45 * Math.cos(-45 * rad);
+                const p8y = 200 + 45 * Math.sin(-45 * rad);
+
+                const borderD = `
+                    M ${p1x} ${p1y}
+                    L ${p2x} ${p2y}
+                    A 150 150 0 0 1 ${p3x} ${p3y}
+                    L ${p4x} ${p4y}
+                    A 190 190 0 0 1 ${p5x} ${p5y}
+                    L ${p6x} ${p6y}
+                    A 150 150 0 0 1 ${p7x} ${p7y}
+                    L ${p8x} ${p8y}
+                    A 45 45 0 0 0 ${p1x} ${p1y}
+                    Z
+                `;
+                borderPath.setAttribute("d", borderD);
+            }
+        }
+
+        // Draw Roman relative letters inside the shutter at static local positions (mapped perfectly to active mode structure)
+        function drawRelativeRomans() {
+            const romanGroup = document.getElementById("relative-roman-labels");
+            if (!romanGroup) return;
+            romanGroup.innerHTML = "";
+
+            const rad = Math.PI / 180;
+            const radii = { inner: 68, middle: 108, outer: 148 };
+            const activeMode = modesSpectrum[currentModeIndex];
+
+            // Retrive Roman numerals mapping configured dynamically for the active mode
+            const activeRomansConfig = modeRomans[activeMode.id];
+
+            let leftIn = activeRomansConfig.leftInner;
+            let centerIn = activeRomansConfig.centerInner;
+            let rightIn = activeRomansConfig.rightInner;
+            let leftMid = activeRomansConfig.leftMiddle;
+            let centerMid = activeRomansConfig.centerMiddle;
+            let rightMid = activeRomansConfig.rightMiddle;
+            let centerOut = activeRomansConfig.centerOuter;
+
+            // Formulate 7ths roman characters extension if Active
+            if (currentChordType === "seventh") {
+                const addSuf = (rom) => {
+                    if (rom.includes("°")) return rom.replace("°", "ø7");
+                    if (rom.includes("ø")) return rom;
+                    if (rom === "I" || rom === "IV" || rom === "V" || rom === "bIII" || rom === "bVI" || rom === "bVII" || rom === "bII" || rom === "bV") {
+                        return rom + "maj7";
+                    }
+                    return rom + "m7";
+                };
+                leftIn = addSuf(leftIn);
+                centerIn = addSuf(centerIn);
+                rightIn = addSuf(rightIn);
+                leftMid = addSuf(leftMid);
+                centerMid = addSuf(centerMid);
+                rightMid = addSuf(rightMid);
+                centerOut = addSuf(centerOut);
+            }
+
+            const shutterAssignments = [
+                { angleOffset: -30, ring: "inner", label: leftIn },
+                { angleOffset: -30, ring: "middle", label: leftMid },
+                { angleOffset: 0, ring: "inner", label: centerIn },
+                { angleOffset: 0, ring: "middle", label: centerMid },
+                { angleOffset: 0, ring: "outer", label: centerOut },
+                { angleOffset: 30, ring: "inner", label: rightIn },
+                { angleOffset: 30, ring: "middle", label: rightMid }
+            ];
+
+            shutterAssignments.forEach(item => {
+                const angle = -90 + item.angleOffset;
+                // Offset slightly to the left (by 11 degrees) to perfectly replicate the video card look
+                const offsetAngle = angle - 11;
+                const r = radii[item.ring];
+                
+                const tx = 200 + r * Math.cos(offsetAngle * rad);
+                const ty = 200 + r * Math.sin(offsetAngle * rad);
+
+                const textNode = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                textNode.setAttribute("x", tx);
+                textNode.setAttribute("y", ty);
+                textNode.setAttribute("text-anchor", "middle");
+                textNode.setAttribute("dominant-baseline", "middle");
+                
+                // Tighten size slightly for longer maj7 / m7 formulas
+                const fontSize = currentChordType === "seventh" ? "8px" : "10px";
+                textNode.setAttribute("font-size", fontSize);
+                textNode.setAttribute("font-weight", "900");
+                textNode.setAttribute("fill", "#ffffff");
+                textNode.setAttribute("fill-opacity", "0.9");
+                textNode.textContent = item.label;
+                romanGroup.appendChild(textNode);
+            });
+        }
+
+        // Draw Mode Labels around outer rotatable rim
+        function buildOuterRimLabels() {
+            const rimGroup = document.getElementById("outer-rim-labels");
+            rimGroup.innerHTML = "";
+
+            const rad = Math.PI / 180;
+            modesSpectrum.forEach((mode, idx) => {
+                // Outer mode positions are distributed statically relative to the shutter center (0 degrees)
+                const labelAngle = -90 + (mode.offset * 30);
+                const tx = 200 + 195 * Math.cos(labelAngle * rad);
+                const ty = 200 + 195 * Math.sin(labelAngle * rad);
+
+                const textEl = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                textEl.setAttribute("x", tx);
+                textEl.setAttribute("y", ty);
+                textEl.setAttribute("text-anchor", "middle");
+                textEl.setAttribute("dominant-baseline", "middle");
+                textEl.setAttribute("font-size", "10px");
+                textEl.setAttribute("font-weight", "900");
+                textEl.setAttribute("fill", idx === currentModeIndex ? "#fbbf24" : "#a1a1aa");
+                textEl.textContent = mode.name;
+
+                rimGroup.appendChild(textEl);
+            });
+        }
+
+        // Build Key selection row
+        function buildKeySelector() {
+            const grid = document.getElementById("key-grid");
+            grid.innerHTML = "";
+            fifthsCircle.forEach((key, index) => {
+                const btn = document.createElement("button");
+                btn.className = `py-1 text-xs font-bold rounded-lg border transition-all ${
+                    index === currentTonicIndex
+                        ? "bg-amber-500 text-zinc-950 border-amber-400 font-extrabold"
+                        : "bg-zinc-950 text-zinc-400 border-zinc-800 hover:text-zinc-200"
+                }`;
+                btn.innerText = key.name;
+                btn.onclick = () => {
+                    initAudio();
+                    currentTonicIndex = index;
+                    // Reset custom loop preset to major default
+                    customProgression = [...modesSpectrum[currentModeIndex].defaultLoop];
+                    rotateWheelToMatch();
+                    updateUI();
+                };
+                grid.appendChild(btn);
+            });
+        }
+
+        // Build Mode spectrum selector list
+        function buildModeSelector() {
+            const list = document.getElementById("mode-list");
+            list.innerHTML = "";
+            modesSpectrum.forEach((mode, index) => {
+                const btn = document.createElement("button");
+                btn.className = `w-full py-1.5 px-3 flex justify-between items-center rounded-xl border text-xs font-medium transition-all ${
+                    index === currentModeIndex
+                        ? "bg-zinc-800 border-zinc-700 text-white"
+                        : "bg-zinc-950/40 border-zinc-800/60 text-zinc-400 hover:text-zinc-200"
+                }`;
+                
+                btn.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${mode.color}"></span>
+                        <span>${mode.name}</span>
+                    </div>
+                    <span class="text-[10px] opacity-60 font-mono">${mode.brightness}</span>
+                `;
+                
+                btn.onclick = () => {
+                    initAudio();
+                    currentModeIndex = index;
+                    customProgression = [...mode.defaultLoop];
+                    rotateWheelToMatch();
+                    updateUI();
+                };
+                list.appendChild(btn);
+            });
+
+            const currentMode = modesSpectrum[currentModeIndex];
+            const tag = document.getElementById("mode-brightness-tag");
+            tag.innerText = currentMode.brightness;
+            tag.style.borderColor = currentMode.color;
+            tag.style.color = currentMode.color;
+        }
+
+        // Compute rotation matrix using native SVG transforms to guarantee bulletproof center alignment
+        function rotateWheelToMatch() {
+            const activeMode = modesSpectrum[currentModeIndex];
+            overlayAngle = (currentTonicIndex + activeMode.offset) * 30;
+            overlayAngle = (overlayAngle % 360 + 360) % 360; // Normalize angle range
+
+            const overlayGroup = document.getElementById("rotating-overlay-group");
+            overlayGroup.setAttribute("transform", `rotate(${overlayAngle} 200 200)`);
+        }
+
+        // Update central hud and chords listing in side bars
+        function updateSidebarAndTonicDisplay() {
+            const scaleInfo = getScaleInfo();
+            
+            // Central Hub Label Update
+            document.getElementById("center-key-letter").innerText = fifthsCircle[currentTonicIndex].name;
+            document.getElementById("center-mode-label").innerText = modesSpectrum[currentModeIndex].name;
+
+            const container = document.getElementById("chord-badges-container");
+            container.innerHTML = "";
+
+            // Dynamic chronological sorting of the active chords by scale degree order
+            const displayChords = [...scaleInfo.activeChords];
+            displayChords.sort((a, b) => {
+                const scoreA = degreeOrder[a.roman] || 99;
+                const scoreB = degreeOrder[b.roman] || 99;
+                return scoreA - scoreB;
+            });
+
+            displayChords.forEach(chord => {
+                const row = document.createElement("button");
+                row.className = `w-full p-2 rounded-xl border bg-zinc-950 text-left flex justify-between items-center transition-all hover:border-zinc-700 active:scale-98 ${
+                    chord.name === fifthsCircle[currentTonicIndex].name 
+                        ? "border-amber-500/40 bg-amber-500/5 shadow-sm shadow-amber-500/5" 
+                        : "border-zinc-800"
+                }`;
+
+                // Play handler
+                row.onclick = () => {
+                    const rootMidi = 48 + chord.semitones;
+                    playChord(rootMidi, chord.quality);
+                };
+
+                const chordNameTag = getChordLabel(chord.name, chord.quality, currentChordType);
+                row.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center font-bold text-xs text-zinc-100">
+                            ${chord.name}
+                        </span>
+                        <div>
+                            <span class="text-xs font-bold text-zinc-300 block">${chordNameTag}</span>
+                            <span class="text-[9px] text-zinc-500 uppercase font-medium">${chord.quality === 'dim' ? 'diminished' : chord.quality}</span>
+                        </div>
+                    </div>
+                    <span class="text-xs font-black text-amber-400/80 font-mono">${chord.roman}</span>
+                `;
+
+                container.appendChild(row);
+            });
+
+            updateSequencerLayout();
+        }
+
+        // Setup Customizable Step Sequencer Chords
+        function updateSequencerLayout() {
+            const scaleInfo = getScaleInfo();
+            const sequenceBar = document.getElementById("preset-sequence-bar");
+            sequenceBar.innerHTML = "";
+
+            customProgression.forEach((roman, idx) => {
+                // Find chord inside scale
+                let match = scaleInfo.activeChords.find(c => c.roman.toLowerCase() === roman.toLowerCase());
+                
+                // Fallback for custom out-of-scale additions
+                let chordName = roman;
+                let subtitle = "custom";
+                if (match) {
+                    chordName = getChordLabel(match.name, match.quality, currentChordType);
+                    subtitle = roman;
+                }
+
+                const stepBox = document.createElement("button");
+                stepBox.id = `loop-step-${idx}`;
+                stepBox.className = `flex flex-col items-center justify-center p-2 rounded-xl border transition-all text-center ${
+                    idx === loopStep && isPlayingLoop 
+                        ? 'border-amber-400 bg-amber-500/10 scale-105 shadow shadow-amber-400/10' 
+                        : 'bg-zinc-900 border-zinc-800 hover:border-zinc-700'
+                }`;
+
+                stepBox.innerHTML = `
+                    <span class="text-[11px] font-black text-zinc-100 leading-tight">${chordName}</span>
+                    <span class="text-[9px] font-bold text-amber-400/80 font-mono mt-0.5">${subtitle}</span>
+                `;
+
+                // Launch custom chord reassignment menu
+                stepBox.onclick = () => {
+                    openChordPopover(idx);
+                };
+
+                sequenceBar.appendChild(stepBox);
+            });
+
+            // Description display
+            const mode = modesSpectrum[currentModeIndex];
+            const descEl = document.getElementById("progression-desc");
+            descEl.innerHTML = `
+                <strong class="text-white">${mode.name} Mode Info:</strong> ${mode.description} 
+                <br/><span class="mt-1 block text-zinc-400 font-medium">Loop Sequence: <strong class="text-amber-400 font-mono">${customProgression.join(" - ")}</strong></span>
+            `;
+        }
+
+        // Custom Chord Popover controls
+        function openChordPopover(slotIndex) {
+            targetReassignSlot = slotIndex;
+            document.getElementById("target-slot-num").innerText = slotIndex + 1;
+            
+            const optionsBox = document.getElementById("popover-chord-options");
+            optionsBox.innerHTML = "";
+
+            const scaleInfo = getScaleInfo();
+
+            // Populate scale degree options chronologically
+            const displayChords = [...scaleInfo.activeChords];
+            displayChords.sort((a, b) => {
+                const scoreA = degreeOrder[a.roman] || 99;
+                const scoreB = degreeOrder[b.roman] || 99;
+                return scoreA - scoreB;
+            });
+
+            displayChords.forEach(chord => {
+                const optBtn = document.createElement("button");
+                optBtn.className = "p-1.5 bg-zinc-800 hover:bg-amber-500 hover:text-zinc-950 text-white rounded text-xs font-bold transition-all";
+                const displayLabel = getChordLabel(chord.name, chord.quality, currentChordType);
+                optBtn.innerText = `${displayLabel} (${chord.roman})`;
+                
+                optBtn.onclick = () => {
+                    customProgression[slotIndex] = chord.roman;
+                    closeChordPopover();
+                    updateSequencerLayout();
+                };
+                optionsBox.appendChild(optBtn);
+            });
+
+            // Extra borrow option (like parallel minor/major chords)
+            const extraBtn = document.createElement("button");
+            extraBtn.className = "col-span-4 p-1.5 bg-zinc-950 border border-zinc-800 text-zinc-400 hover:text-white rounded text-[10px] font-bold mt-1";
+            extraBtn.innerText = "+ Standard Maj/Min borrow";
+            extraBtn.onclick = () => {
+                const res = prompt("Enter custom Chord Symbol manually (e.g. Fm7, Bb7, Gmaj7):", "Bb7");
+                if (res) {
+                    customProgression[slotIndex] = res;
+                }
+                closeChordPopover();
+                updateSequencerLayout();
+            };
+            optionsBox.appendChild(extraBtn);
+
+            document.getElementById("chord-selector-popover").classList.remove("hidden");
+        }
+
+        function closeChordPopover() {
+            document.getElementById("chord-selector-popover").classList.add("hidden");
+        }
+
+        // Play/Pause Sequencer Engine
+        function toggleLoopPlayer() {
+            if (isPlayingLoop) {
+                // Stop loop
+                clearInterval(loopTimer);
+                loopTimer = null;
+                isPlayingLoop = false;
+                document.getElementById("btn-loop-toggle").className = "flex-1 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-zinc-950 font-bold rounded-xl text-xs shadow-md shadow-emerald-500/10 hover:shadow-emerald-500/20 active:scale-95 transition-all flex items-center justify-center gap-2";
+                document.getElementById("btn-loop-toggle").innerHTML = `<i class="fa-solid fa-play"></i> Start Loop Player`;
+                
+                for (let i = 0; i < 4; i++) {
+                    const el = document.getElementById(`loop-step-${i}`);
+                    if (el) el.className = "flex flex-col items-center justify-center p-2 rounded-xl bg-zinc-900 border-zinc-800 text-center transition-all";
+                }
+            } else {
+                // Start loop
+                initAudio();
+                isPlayingLoop = true;
+                loopStep = 0;
+                document.getElementById("btn-loop-toggle").className = "flex-1 py-2.5 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl text-xs shadow-md shadow-rose-500/10 active:scale-95 transition-all flex items-center justify-center gap-2";
+                document.getElementById("btn-loop-toggle").innerHTML = `<i class="fa-solid fa-stop animate-pulse"></i> Stop Loop Player`;
+                
+                playSequencerStep();
+                
+                const intervalMs = (60 / bpm) * 2000; // 2 beats
+                loopTimer = setInterval(() => {
+                    loopStep = (loopStep + 1) % 4;
+                    playSequencerStep();
+                }, intervalMs);
+            }
+        }
+
+        function playSequencerStep() {
+            const scaleInfo = getScaleInfo();
+            const activeRoman = customProgression[loopStep];
+            
+            // Step Highlights
+            for (let i = 0; i < 4; i++) {
+                const el = document.getElementById(`loop-step-${i}`);
+                if (el) {
+                    if (i === loopStep) {
+                        el.className = "flex flex-col items-center justify-center p-2 rounded-xl border border-amber-400 bg-amber-500/10 scale-105 shadow shadow-amber-400/10 text-center transition-all";
+                    } else {
+                        el.className = "flex flex-col items-center justify-center p-2 rounded-xl bg-zinc-900 border-zinc-800 text-center transition-all";
+                    }
+                }
+            }
+
+            // Play match
+            let match = scaleInfo.activeChords.find(c => c.roman.toLowerCase() === activeRoman.toLowerCase());
+            if (!match) match = scaleInfo.activeChords[loopStep % 7];
+
+            const rootMidi = 48 + match.semitones;
+            playChord(rootMidi, match.quality);
+
+            const label = document.getElementById("playing-chord-label");
+            label.innerText = `Loop: ${match.name} ${match.quality === 'dim' ? 'diminished' : match.quality}`;
+            label.className = "text-xs font-semibold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full opacity-100 transition-opacity";
+        }
+
+        // Keyboard Visualizer layout builder
+        function buildPianoKeyboard() {
+            const piano = document.getElementById("piano-keyboard");
+            piano.innerHTML = "";
+
+            const totalKeys = 24;
+            const startMidi = 48; // C3
+            const isBlackKey = [false, true, false, true, false, false, true, false, true, false, true, false];
+
+            // Render White Keys
+            for (let i = 0; i < totalKeys; i++) {
+                const noteMidi = startMidi + i;
+                const noteInOctave = noteMidi % 12;
+                if (!isBlackKey[noteInOctave]) {
+                    const whiteKey = document.createElement("div");
+                    whiteKey.id = `key-midi-${noteMidi}`;
+                    whiteKey.className = "flex-1 bg-white border-r border-zinc-300 rounded-b-lg hover:bg-zinc-100 active:bg-zinc-200 cursor-pointer transition-colors relative";
+                    
+                    if (noteMidi === 60) {
+                        whiteKey.innerHTML = `<span class="absolute bottom-2 left-1/2 transform -translate-x-1/2 text-[9px] font-bold text-zinc-400 font-mono">C4</span>`;
+                    }
+
+                    whiteKey.onclick = () => {
+                        playNote(440 * Math.pow(2, (noteMidi - 69) / 12), audioContext ? audioContext.currentTime : 0, 1.0, currentSynthType);
+                        whiteKey.classList.add("bg-amber-300");
+                        setTimeout(() => whiteKey.classList.remove("bg-amber-300"), 500);
+                    };
+                    piano.appendChild(whiteKey);
+                }
+            }
+
+            // Render Black keys absolutely positioned above white layers
+            const numWhiteKeys = 14; 
+            const whiteKeyWidthPercent = 100 / numWhiteKeys;
+
+            let whiteKeyIndex = 0;
+            for (let i = 0; i < totalKeys; i++) {
+                const noteMidi = startMidi + i;
+                const noteInOctave = noteMidi % 12;
+
+                if (isBlackKey[noteInOctave]) {
+                    const blackKey = document.createElement("div");
+                    blackKey.id = `key-midi-${noteMidi}`;
+                    blackKey.className = "absolute bg-zinc-950 border-x border-b border-zinc-850 rounded-b-md hover:bg-zinc-800 active:bg-zinc-750 cursor-pointer transition-colors z-10";
+                    blackKey.style.height = "60%";
+                    blackKey.style.width = `${whiteKeyWidthPercent * 0.7}%`;
+                    
+                    const leftOffset = whiteKeyWidthPercent * whiteKeyIndex - (whiteKeyWidthPercent * 0.35);
+                    blackKey.style.left = `${leftOffset}%`;
+
+                    blackKey.onclick = () => {
+                        playNote(440 * Math.pow(2, (noteMidi - 69) / 12), audioContext ? audioContext.currentTime : 0, 1.0, currentSynthType);
+                        blackKey.classList.add("bg-amber-400");
+                        setTimeout(() => blackKey.classList.remove("bg-amber-400"), 500);
+                    };
+                    piano.appendChild(blackKey);
+                } else {
+                    whiteKeyIndex++;
+                }
+            }
+        }
+
+        function updateKeyboardVisuals() {
+            const isBlackKey = [false, true, false, true, false, false, true, false, true, false, true, false];
+            for (let noteMidi = 48; noteMidi <= 71; noteMidi++) {
+                const el = document.getElementById("key-midi-" + noteMidi);
+                if (el) {
+                    const noteInOctave = noteMidi % 12;
+                    const isBlack = isBlackKey[noteInOctave];
+                    
+                    if (activeKeyboardKeys.includes(noteMidi)) {
+                        const modeColor = modesSpectrum[currentModeIndex].color;
+                        el.style.backgroundColor = modeColor;
+                    } else {
+                        el.style.backgroundColor = isBlack ? "#09090b" : "#ffffff";
+                    }
+                }
+            }
+        }
+
+        // TACTILE WHEEL INTERACTIVE ROTATION DRAG HANDLERS
+        function getMouseAngle(event) {
+            const svg = document.getElementById("chordmap-svg");
+            const rect = svg.getBoundingClientRect();
+            // Center in viewport pixels
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+            const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+
+            const dx = clientX - centerX;
+            const dy = clientY - centerY;
+            
+            // Radians to degrees converter
+            return Math.atan2(dy, dx) * (180 / Math.PI);
+        }
+
+        function setupDragToRotate() {
+            const overlayGroup = document.getElementById("rotating-overlay-group");
+
+            const startDrag = (e) => {
+                // Only trigger if clicking outer rim or blank background area
+                if (e.target.tagName === "text" || e.target.tagName === "circle" && e.target.getAttribute("r") < 30) {
+                    return; // chord buttons take precedence
+                }
+                initAudio();
+                isDraggingRim = true;
+                overlayGroup.style.transition = 'none'; // Instant drag response
+                dragStartAngle = getMouseAngle(e);
+                baseRotationAtDragStart = overlayAngle;
+                
+                document.body.classList.add("select-none");
+                overlayGroup.classList.remove("cursor-grab");
+                overlayGroup.classList.add("cursor-grabbing");
+            };
+
+            const doDrag = (e) => {
+                if (!isDraggingRim) return;
+                
+                if (e.touches) {
+                    e.preventDefault(); // Stop mobile bouncing scroll during dragging
+                }
+
+                const currentAngle = getMouseAngle(e);
+                const delta = currentAngle - dragStartAngle;
+                overlayAngle = (baseRotationAtDragStart + delta) % 360;
+                
+                // Keep angle positive
+                if (overlayAngle < 0) overlayAngle += 360;
+
+                overlayGroup.setAttribute("transform", `rotate(${overlayAngle} 200 200)`);
+                
+                // Track dynamic nearest sector
+                const activeMode = modesSpectrum[currentModeIndex];
+                const rawTonic = Math.round(overlayAngle / 30) - activeMode.offset;
+                const snappedTonic = (rawTonic % 12 + 12) % 12;
+
+                if (snappedTonic !== currentTonicIndex) {
+                    currentTonicIndex = snappedTonic;
+                    updateUIWithoutRotating();
+                }
+            };
+
+            const endDrag = () => {
+                if (!isDraggingRim) return;
+                isDraggingRim = false;
+                overlayGroup.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'; // Snappy bounce
+                
+                // Snap to nearest 30deg sector segment
+                const activeMode = modesSpectrum[currentModeIndex];
+                const rawTonic = Math.round(overlayAngle / 30) - activeMode.offset;
+                currentTonicIndex = (rawTonic % 12 + 12) % 12;
+
+                overlayAngle = (currentTonicIndex + activeMode.offset) * 30;
+                overlayAngle = (overlayAngle % 360 + 360) % 360;
+                
+                overlayGroup.setAttribute("transform", `rotate(${overlayAngle} 200 200)`);
+
+                document.body.classList.remove("select-none");
+                overlayGroup.classList.remove("cursor-grabbing");
+                overlayGroup.classList.add("cursor-grab");
+
+                updateUI();
+            };
+
+            // Mouse Events
+            overlayGroup.addEventListener("mousedown", startDrag);
+            window.addEventListener("mousemove", doDrag);
+            window.addEventListener("mouseup", endDrag);
+
+            // Touch support for mobile devices
+            overlayGroup.addEventListener("touchstart", startDrag, { passive: false });
+            window.addEventListener("touchmove", doDrag, { passive: false });
+            window.addEventListener("touchend", endDrag);
+        }
+
+        // Global UI Refresh wrapper
+        function updateUI() {
+            buildKeySelector();
+            buildModeSelector();
+            updateShutterMaskAndOutline();
+            buildOuterRimLabels();
+            drawRelativeRomans();
+            updateSidebarAndTonicDisplay();
+        }
+
+        // Light weight update helper when dragging to prevent micro lag
+        function updateUIWithoutRotating() {
+            buildKeySelector();
+            buildModeSelector();
+            updateSidebarAndTonicDisplay();
+        }
+
+        window.onload = function() {
+            buildBaseWheel();
+            buildPianoKeyboard();
+            setupDragToRotate();
+            updateUI();
+
+            // Setup volume controller
+            const volumeSlider = document.getElementById("volume-slider");
+            volumeSlider.oninput = (e) => {
+                masterVolume = parseFloat(e.target.value);
+                if (masterGainNode) {
+                    masterGainNode.gain.setValueAtTime(masterVolume, audioContext.currentTime);
+                }
+            };
+
+            document.getElementById("btn-loop-toggle").onclick = toggleLoopPlayer;
+
+            // Reset loop presets to base default
+            document.getElementById("btn-reset-loop").onclick = () => {
+                customProgression = [...modesSpectrum[currentModeIndex].defaultLoop];
+                updateSequencerLayout();
+            };
+
+            // Setup BPM slider
+            const bpmSlider = document.getElementById("bpm-slider");
+            bpmSlider.oninput = (e) => {
+                bpm = parseInt(e.target.value);
+                document.getElementById("bpm-display").innerText = bpm + " BPM";
+                document.getElementById("tempo-val").innerText = bpm + " BPM";
+                
+                if (isPlayingLoop) {
+                    toggleLoopPlayer(); 
+                    toggleLoopPlayer(); 
+                }
+            };
+
+            // Chord extensions toggle (triads vs sevenths)
+            const btnTriad = document.getElementById("btn-triad");
+            const btnSeventh = document.getElementById("btn-seventh");
+            
+            btnTriad.onclick = () => {
+                currentChordType = "triad";
+                btnTriad.className = "py-1.5 px-3 rounded-lg text-xs font-bold transition-all border border-amber-500/30 bg-amber-500/10 text-amber-400 shadow-sm shadow-amber-500/5";
+                btnSeventh.className = "py-1.5 px-3 rounded-lg text-xs font-bold transition-all border border-zinc-800 bg-zinc-950 text-zinc-400 hover:text-zinc-200";
+                
+                buildBaseWheel(); // Redraw static wheel using triads note dot layouts
+                updateUI();       // Update list names to match standard triads
+            };
+            
+            btnSeventh.onclick = () => {
+                currentChordType = "seventh";
+                btnSeventh.className = "py-1.5 px-3 rounded-lg text-xs font-bold transition-all border border-amber-500/30 bg-amber-500/10 text-amber-400 shadow-sm shadow-amber-500/5";
+                btnTriad.className = "py-1.5 px-3 rounded-lg text-xs font-bold transition-all border border-zinc-800 bg-zinc-950 text-zinc-400 hover:text-zinc-200";
+                
+                buildBaseWheel(); // Redraw static wheel using 7ths 4-dot spectrum layouts
+                updateUI();       // Update list names to match standard sevenths
+            };
+
+            // Direct rotation pushers
+            document.getElementById("btn-rotate-ccw").onclick = () => {
+                initAudio();
+                currentTonicIndex = (currentTonicIndex - 1 + 12) % 12;
+                rotateWheelToMatch();
+                updateUI();
+            };
+            document.getElementById("btn-rotate-cw").onclick = () => {
+                initAudio();
+                currentTonicIndex = (currentTonicIndex + 1) % 12;
+                rotateWheelToMatch();
+                updateUI();
+            };
+
+            // Synth profiles selectors
+            const syRhodes = document.getElementById("synth-rhodes");
+            const syPiano = document.getElementById("synth-piano");
+            const syPad = document.getElementById("synth-pad");
+
+            syRhodes.onclick = () => {
+                currentSynthType = "rhodes";
+                syRhodes.className = "py-1.5 px-2 bg-purple-500/10 border border-purple-500/30 text-purple-400 text-xs font-semibold rounded-lg transition-all";
+                syPiano.className = "py-1.5 px-2 bg-zinc-950 border border-zinc-800 text-zinc-400 text-xs font-semibold rounded-lg hover:text-zinc-200 transition-all";
+                syPad.className = "py-1.5 px-2 bg-zinc-950 border border-zinc-800 text-zinc-400 text-xs font-semibold rounded-lg hover:text-zinc-200 transition-all";
+            };
+            syPiano.onclick = () => {
+                currentSynthType = "piano";
+                syPiano.className = "py-1.5 px-2 bg-purple-500/10 border border-purple-500/30 text-purple-400 text-xs font-semibold rounded-lg transition-all";
+                syRhodes.className = "py-1.5 px-2 bg-zinc-950 border border-zinc-800 text-zinc-400 text-xs font-semibold rounded-lg hover:text-zinc-200 transition-all";
+                syPad.className = "py-1.5 px-2 bg-zinc-950 border border-zinc-800 text-zinc-400 text-xs font-semibold rounded-lg hover:text-zinc-200 transition-all";
+            };
+            syPad.onclick = () => {
+                currentSynthType = "pad";
+                syPad.className = "py-1.5 px-2 bg-purple-500/10 border border-purple-500/30 text-purple-400 text-xs font-semibold rounded-lg transition-all";
+                syRhodes.className = "py-1.5 px-2 bg-zinc-950 border border-zinc-800 text-zinc-400 text-xs font-semibold rounded-lg hover:text-zinc-200 transition-all";
+                syPiano.className = "py-1.5 px-2 bg-zinc-950 border border-zinc-800 text-zinc-400 text-xs font-semibold rounded-lg hover:text-zinc-200 transition-all";
+            };
+
+            document.getElementById("btn-audio-init").onclick = initAudio;
+        };
+    </script>
+</body>
+</html>
